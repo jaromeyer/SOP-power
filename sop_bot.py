@@ -65,7 +65,6 @@ async def on_message(message):
             votes[message.author.id] = False
             response = "fettig " + message.author.display_name
             await message.channel.send(response)
-        print(players)
         if len(votes) == players:
             active = False
             smash_count = 0
