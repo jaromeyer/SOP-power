@@ -1,5 +1,8 @@
 # sop_bot.py
-import os, time, re, hashlib
+import os
+import time
+import re
+import hashlib
 
 import discord
 from dotenv import load_dotenv
@@ -75,22 +78,22 @@ async def on_message(message):
                     smash_count += 1
             if smash_count == players/2:
                 if votes[357527871482232833]:
-                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: SMASH"
+                    response = "Der fette hat sein Veto ausgesprochen: **SMASH**:peach:"
                     adb_execute('shell input tap 690 1820')
                 else:
-                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: PASS"
+                    response = "Der fette hat sein Veto ausgesprochen: **PASS**:nauseated_face:"
                     adb_execute('shell input tap 390 1820')
             elif smash_count > players/2:
                 if smash_count == players:
-                    response = "Der Grosse Rat hat sich entschieden: OBERMEGA-SMASH"
+                    response = "Der Grosse Rat hat entschieden: **OBERMEGA-SMASH**:peach::eggplant::sweat_drops:"
                 else:
-                    response = "Der Grosse Rat hat sich entschieden: SMASH"
+                    response = "Der Grosse Rat hat entschieden: **SMASH**:peach:"
                 adb_execute('shell input tap 690 1820')
             else:
                 if smash_count == 0:
-                    response = "Der Grosse Rat hat sich entschieden: OBERMEGA-PASS:face_vomiting::face_vomiting::face_vomiting:"
+                    response = "Der Grosse Rat hat entschieden: **OBERMEGA-PASS**:face_vomiting:"
                 else:
-                    response = "Der Grosse Rat hat sich entschieden: PASS"
+                    response = "Der Grosse Rat hat entschieden: **PASS**:nauseated_face:"
                 adb_execute('shell input tap 390 1820')
             await message.channel.send(response)
             await message.channel.send("Neue Runde...")
