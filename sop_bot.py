@@ -44,11 +44,11 @@ async def send_profile(message):
 
 @client.event
 async def on_message(message):
-    global active, players, votes
+    global active, players, votes, myTurn
     print("Message: ", message.content, "- Author: ", message.author)
-
-    myTurn = hash(str(message.attachments)) % 2 == 0
-    if message.content == "Neue Runde..." and myTurn:  # if finished
+    if(message.attachments != []):
+        myTurn = hash(str(message.attachments[0].id)) % 2 == 0
+    if message.content == 'Neue Runde...' and myTurn:
         await send_profile(message)
 
     if message.author == client.user:
@@ -64,12 +64,8 @@ async def on_message(message):
     elif active:
         if message.content == 'smash':
             votes[message.author.id] = True
-            # response = "gönn dir " + message.author.display_name
-            # await message.channel.send(response)
         elif message.content == 'pass':
             votes[message.author.id] = False
-            # response = "fettig " + message.author.display_name
-            # await message.channel.send(response)
         if len(votes) == players:
             active = False
             smash_count = 0
