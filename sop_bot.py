@@ -2,6 +2,7 @@
 import os
 import time
 import re
+import random
 
 import discord
 from dotenv import load_dotenv
@@ -47,7 +48,8 @@ async def on_message(message):
     global active, players, votes, myTurn
     print("Message: ", message.content, "- Author: ", message.author)
     if(message.attachments != []):
-        myTurn = hash(str(message.attachments[0].id)) % 2 == 0
+        random.seed(message.attachments[0])
+        myTurn = random.randint(0, 1) == 0
     if message.content == 'Neue Runde...' and myTurn:
         await send_profile(message)
 
