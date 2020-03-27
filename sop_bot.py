@@ -17,18 +17,19 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 
 
+def adb_execute(command):
+    os.system('/Users/jaro/Library/Android/sdk/platform-tools/adb ' + command)
+
+
 async def send_profile(message):
     global active, votes
     time.sleep(0.5)
     while True:
         response = "Loading image..."
         await message.channel.send(response)
-        os.system(
-            '/Users/jaro/Library/Android/sdk/platform-tools/adb shell screencap -p /sdcard/DCIM/screenshot.png')
-        os.system(
-            '/Users/jaro/Library/Android/sdk/platform-tools/adb pull /sdcard/DCIM/screenshot.png screenshot.png')
-        os.system(
-            '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 880 1000')
+        adb_execute('shell screencap -p /sdcard/DCIM/screenshot.png')
+        adb_execute('pull /sdcard/DCIM/screenshot.png screenshot.png')
+        adb_execute('shell input tap 880 1000')
         im = Image.open('screenshot.png')
         pix = im.load()
         im = im.crop((35, 193, 1050, 1687))
@@ -59,38 +60,37 @@ async def on_message(message):
     elif active:
         if message.content == 'smash':
             votes[message.author.id] = True
-            #response = "gönn dir " + message.author.display_name
-            #await message.channel.send(response)
+            # response = "gönn dir " + message.author.display_name
+            # await message.channel.send(response)
         elif message.content == 'pass':
             votes[message.author.id] = False
-            #response = "fettig " + message.author.display_name
-            #await message.channel.send(response)
+            # response = "fettig " + message.author.display_name
+            # await message.channel.send(response)
         if len(votes) == players:
             active = False
             smash_count = 0
-            pass_count = 0
             for vote in votes.values():
                 if vote:
                     smash_count += 1
-                else:
-                    pass_count += 1
-            if smash_count == pass_count:
+            if smash_count == players/2:
                 if votes[357527871482232833]:
                     response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: SMASH"
-                    os.system(
-                        '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 690 1820')
+                    adb_execute('shell input tap 690 1820')
                 else:
                     response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: PASS"
-                    os.system(
-                        '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 390 1820')
-            elif smash_count > pass_count:
-                response = "Der Grosse Rat hat sich entschieden: SMASH"
-                os.system(
-                    '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 690 1820')
+                    adb_execute('shell input tap 390 1820')
+            elif smash_count > players/2:
+                if smash_count == players:
+                    response = "Der Grosse Rat hat sich entschieden: OBERMEGA-SMASH"
+                else:
+                    response = "Der Grosse Rat hat sich entschieden: SMASH"
+                adb_execute('shell input tap 690 1820')
             else:
-                response = "Der Grosse Rat hat sich entschieden: PASS"
-                os.system(
-                    '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 390 1820')
+                if smash_count == 0:
+                    response = "Der Grosse Rat hat sich entschieden: OBERMEGA-PASS:face_vomiting::face_vomiting::face_vomiting:"
+                else:
+                    response = "Der Grosse Rat hat sich entschieden: PASS"
+                adb_execute('shell input tap 390 1820')
             await message.channel.send(response)
             await send_profile(message)
 client.run(TOKEN)
