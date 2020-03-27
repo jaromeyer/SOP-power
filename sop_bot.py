@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from PIL import Image
 
 active = False
+myTurn = True
 players = 0
 votes = {}
 
@@ -45,18 +46,21 @@ async def send_profile(message):
 async def on_message(message):
     global active, players, votes
     print("Message: ", message.content, "- Author: ", message.author)
+
+    myTurn = hash(str(message.attachments)) % 2 == 0
+    if message.content == "Neue Runde..." and myTurn:  # if finished
+        await send_profile(message)
+
     if message.author == client.user:
         return
 
     if re.match(r'sop \d+', message.content) and not active:
         players = int(re.findall(r'\d+', message.content)[0])
-        response = "SOP started"
-        await message.channel.send(response)
+        await message.channel.send("SOP started")
         await send_profile(message)
     elif message.content == 'stop' and active:
         active = False
-        response = "SOP stopped"
-        await message.channel.send(response)
+        await message.channel.send("SOP stopped")
     elif active:
         if message.content == 'smash':
             votes[message.author.id] = True
@@ -92,5 +96,6 @@ async def on_message(message):
                     response = "Der Grosse Rat hat sich entschieden: PASS"
                 adb_execute('shell input tap 390 1820')
             await message.channel.send(response)
-            await send_profile(message)
+            await message.channel.send("Neue Runde...")
+
 client.run(TOKEN)
