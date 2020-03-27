@@ -49,22 +49,22 @@ async def on_message(message):
 
     if re.match(r'sop \d+', message.content) and not active:
         players = int(re.findall(r'\d+', message.content)[0])
-        response = "Smash or Pass has started"
+        response = "SOP started"
         await message.channel.send(response)
         await send_profile(message)
     elif message.content == 'stop' and active:
         active = False
-        response = "Smash or Pass has stoped"
+        response = "SOP stopped"
         await message.channel.send(response)
     elif active:
         if message.content == 'smash':
             votes[message.author.id] = True
-            response = "gönn dir " + message.author.display_name
-            await message.channel.send(response)
+            #response = "gönn dir " + message.author.display_name
+            #await message.channel.send(response)
         elif message.content == 'pass':
             votes[message.author.id] = False
-            response = "fettig " + message.author.display_name
-            await message.channel.send(response)
+            #response = "fettig " + message.author.display_name
+            #await message.channel.send(response)
         if len(votes) == players:
             active = False
             smash_count = 0
@@ -76,19 +76,19 @@ async def on_message(message):
                     pass_count += 1
             if smash_count == pass_count:
                 if votes[357527871482232833]:
-                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: smash"
+                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: SMASH"
                     os.system(
                         '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 690 1820')
                 else:
-                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: pass"
+                    response = "Die Uneinigkeit ist gross. Der fette hat sein Veto ausgesprochen: PASS"
                     os.system(
                         '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 390 1820')
             elif smash_count > pass_count:
-                response = "Der grosse Rat hat sich für smash entschieden"
+                response = "Der Grosse Rat hat sich entschieden: SMASH"
                 os.system(
                     '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 690 1820')
             else:
-                response = "Der grosse Rat hat sich für pass entschieden"
+                response = "Der Grosse Rat hat sich entschieden: PASS"
                 os.system(
                     '/Users/jaro/Library/Android/sdk/platform-tools/adb shell input tap 390 1820')
             await message.channel.send(response)
