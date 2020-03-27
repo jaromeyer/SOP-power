@@ -1,8 +1,5 @@
 # sop_bot.py
-import os
-import time
-import re
-import random
+import os, time, re, hashlib
 
 import discord
 from dotenv import load_dotenv
@@ -48,8 +45,10 @@ async def on_message(message):
     global active, players, votes, myTurn
     print("Message: ", message.content, "- Author: ", message.author)
     if(message.attachments != []):
-        random.seed(message.attachments[0])
-        myTurn = random.randint(0, 1) == 0
+        img_hash = int(hashlib.sha256(
+            bytes(message.attachments[0].id % 10)).hexdigest(), 16)
+        myTurn = img_hash % 2 == 0
+        print(message.attachments[0].id, img_hash)
     if message.content == 'Neue Runde...' and myTurn:
         await send_profile(message)
 
