@@ -8,8 +8,10 @@ import discord
 from dotenv import load_dotenv
 from PIL import Image
 
-active = False
+multiplayer = True
 myTurn = True
+
+active = False
 players = 0
 votes = {}
 
@@ -27,8 +29,6 @@ async def send_profile(message):
     global active, votes
     time.sleep(0.5)
     while True:
-        response = "Loading image..."
-        await message.channel.send(response)
         adb_execute('shell screencap -p /sdcard/DCIM/screenshot.png')
         adb_execute('pull /sdcard/DCIM/screenshot.png screenshot.png')
         adb_execute('shell input tap 880 1000')
@@ -46,13 +46,14 @@ async def send_profile(message):
 @client.event
 async def on_message(message):
     global active, players, votes, myTurn
-    print("Message: ", message.content, "- Author: ", message.author)
+    print("Message: ", message.content, "- Author: ",
+          message.author, message.author.id)
     if(message.attachments != []):
         img_hash = int(hashlib.sha256(
             bytes(message.attachments[0].id % 10)).hexdigest(), 16)
         myTurn = img_hash % 2 == 0
         print(message.attachments[0].id, img_hash)
-    if message.content == 'Neue Runde...' and myTurn:
+    if (re.match(r'(Der fette.*|Der Grosse Rat.*)', message.content) and myTurn) or not multiplayer:
         await send_profile(message)
 
     if message.author == client.user:
@@ -60,6 +61,7 @@ async def on_message(message):
 
     if re.match(r'sop \d+', message.content) and not active:
         players = int(re.findall(r'\d+', message.content)[0])
+        myTurn = True
         await message.channel.send("SOP started")
         await send_profile(message)
     elif message.content == 'stop' and active:
@@ -77,7 +79,7 @@ async def on_message(message):
                 if vote:
                     smash_count += 1
             if smash_count == players/2:
-                if votes[357527871482232833]:
+                if votes[290120734997479425]:
                     response = "Der fette hat sein Veto ausgesprochen: **SMASH**:peach:"
                     adb_execute('shell input tap 690 1820')
                 else:
@@ -96,6 +98,5 @@ async def on_message(message):
                     response = "Der Grosse Rat hat entschieden: **PASS**:nauseated_face:"
                 adb_execute('shell input tap 390 1820')
             await message.channel.send(response)
-            await message.channel.send("Neue Runde...")
 
 client.run(TOKEN)
