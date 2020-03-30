@@ -8,7 +8,7 @@ import discord
 from dotenv import load_dotenv
 from PIL import Image
 
-multiplayer = False
+multiplayer = True
 myTurn = True
 
 active = False
@@ -29,17 +29,20 @@ async def send_profile(message):
     global active, votes
     time.sleep(0.5)
     im_count = 1
-    if not os.path.exists('img/temp'):
-        os.makedirs('img/temp')
+    if not os.path.exists(r'img/temp'):
+        os.makedirs(r'img/temp')
+    else:
+        for f in os.listdir(r'img/temp'):
+            os.remove(r'img/temp/%s' % f)
     while True:
         adb_execute('shell screencap -p /sdcard/DCIM/screenshot.png')
         adb_execute('pull /sdcard/DCIM/screenshot.png img/screenshot.png')
         adb_execute('shell input tap 880 1000')
-        im = Image.open('img/screenshot.png')
+        im = Image.open(r'img/screenshot.png')
         pix = im.load()
         im = im.crop((35, 193, 1050, 1687))
-        im.save('img/temp/cropped%d.png' % im_count)
-        await message.channel.send(file=discord.File('img/temp/cropped%d.png' % im_count))
+        im.save(r'img/temp/cropped%d.png' % im_count)
+        await message.channel.send(file=discord.File(r'img/temp/cropped%d.png' % im_count))
         im_count += 1
         if pix[1020, 202] == (255, 255, 255, 255) or pix[65, 202] != (255, 255, 255, 255):
             active = True
@@ -96,7 +99,7 @@ async def on_message(message):
             elif smash_count > players/2:
                 if smash_count == players:
                     folder_index = max(
-                        [int(f) for f in next(os.walk('img/oms'))[1]]) + 1
+                        [int(f) for f in next(os.walk(r'img/oms'))[1]]) + 1
                     os.rename(r'img/temp', r'img/oms/%i' % folder_index)
                     response = "Der Grosse Rat hat entschieden: **OBERMEGA-SMASH**:peach::eggplant::sweat_drops:"
                 else:
