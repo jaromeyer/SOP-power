@@ -4,11 +4,13 @@ import time
 import re
 import hashlib
 
+import requests
 import discord
 from dotenv import load_dotenv
-from PIL import Image
+from PIL import Image, ImageFilter
+import pytesseract
 
-multiplayer = True
+multiplayer = False
 myTurn = True
 
 active = False
@@ -42,6 +44,40 @@ async def send_profile(message):
         pix = im.load()
         im = im.crop((35, 193, 1050, 1687))
         im.save(r'img/temp/cropped%d.png' % im_count)
+        if im_count == 1:
+            temp = im.convert('L')
+            temp = temp.point(lambda i: i < 250 and 255)
+            temp = temp.filter(ImageFilter.GaussianBlur(0.5))
+            im_name = temp.crop((130, 30, 500, 76))
+            im_name.save(r'img/temp/name.png')
+            name = pytesseract.image_to_string((im_name)).replace('\n', '')
+            im_age = temp.crop((340, 75, 420, 115))
+            age = pytesseract.image_to_string((im_age), config='digits')
+            im_desc = temp.crop((27, 1300, 950, 1465))
+            im_desc.save(r'img/temp/desc.png')
+            desc = pytesseract.image_to_string((im_desc)).replace('\n', '')
+            response = "**%s**" % name
+            if age != "":
+                response += " (%s)" % age
+                if int(age) < 16:
+                    response += "\n:warning:**ACHTUNG YÄNNE: Dieses Fräulein ist ein bisschen zu jung!**:warning: "
+            if desc != "":
+                response += "\n%s" % desc
+            insta_match = re.search("((Insta|insta|IG|ig|@):|@)\s?(\S+)", desc)
+            if insta_match != None:
+                insta_url = "https://www.instagram.com/%s" % insta_match.group(
+                    3)
+                r = requests.get(insta_url).text
+                followers = int(re.search(
+                    '"edge_followed_by":{"count":([0-9]+)}', r).group(1))
+                response += "\n%s (%i Followers)" % (insta_url, followers)
+                if followers < 150:
+                    response += "\n**Nicht für den Gebrauch im Garten geeignet!**"
+                elif followers > 500:
+                    response += "\n:warning:**Vorsicht: Gartengerät höchster Qualität!**:warning:"
+                else:
+                    response += "\n**Auf dieses Gerät ist verlass**"
+            await message.channel.send(response)
         await message.channel.send(file=discord.File(r'img/temp/cropped%d.png' % im_count))
         im_count += 1
         if pix[1020, 202] == (255, 255, 255, 255) or pix[65, 202] != (255, 255, 255, 255):
@@ -60,7 +96,7 @@ async def on_message(message):
             bytes(message.attachments[0].id % 10)).hexdigest(), 16)
         myTurn = img_hash % 2 == 0
         print(message.attachments[0].id, img_hash)
-    if (re.match(r'(Der fette.*|Der Grosse Rat.*)', message.content) and myTurn):
+    if (re.match(r'(Der fette.*|Der Grosse Rat.*)', message.content) and myTurn and multiplayer):
         await send_profile(message)
 
     if message.author == client.user:
