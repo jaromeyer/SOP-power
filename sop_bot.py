@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from PIL import Image, ImageFilter
 import pytesseract
 
-multiplayer = False
+multiplayer = True
 myTurn = True
 
 active = False
@@ -63,21 +63,23 @@ async def send_profile(message):
                     response += "\n:warning:**ACHTUNG YÄNNE: Dieses Fräulein ist ein bisschen zu jung!**:warning: "
             if desc != "":
                 response += "\n%s" % desc
-            insta_match = re.search("((Insta|insta|IG|ig|@):|@)\s?(\S+)", desc)
+            await message.channel.send(response)
+            insta_match = re.search(
+                "((Instagram|instagram|Insta|insta|IG|ig|@):\s?|@)(\S+)", desc)
             if insta_match != None:
                 insta_url = "https://www.instagram.com/%s" % insta_match.group(
                     3)
                 r = requests.get(insta_url).text
                 followers = int(re.search(
                     '"edge_followed_by":{"count":([0-9]+)}', r).group(1))
-                response += "\n%s (%i Followers)" % (insta_url, followers)
+                insta_response = "%s (%i Followers)" % (insta_url, followers)
                 if followers < 150:
-                    response += "\n**Nicht für den Gebrauch im Garten geeignet!**"
+                    insta_response += "\n**Nicht für den Gebrauch im Garten geeignet!**"
                 elif followers > 500:
-                    response += "\n:warning:**Vorsicht: Gartengerät höchster Qualität!**:warning:"
+                    insta_response += "\n:warning:**Vorsicht: Gartengerät höchster Qualität!**:warning:"
                 else:
-                    response += "\n**Auf dieses Gerät ist verlass**"
-            await message.channel.send(response)
+                    insta_response += "\n**Auf dieses Gerät ist verlass**"
+            await message.channel.send(insta_response)
         await message.channel.send(file=discord.File(r'img/temp/cropped%d.png' % im_count))
         im_count += 1
         if pix[1020, 202] == (255, 255, 255, 255) or pix[65, 202] != (255, 255, 255, 255):
