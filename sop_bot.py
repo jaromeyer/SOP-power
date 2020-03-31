@@ -53,7 +53,7 @@ async def send_profile(message):
             name = pytesseract.image_to_string((im_name)).replace('\n', '')
             im_age = temp.crop((340, 75, 420, 115))
             age = pytesseract.image_to_string((im_age), config='digits')
-            im_desc = temp.crop((27, 1300, 950, 1465))
+            im_desc = temp.crop((27, 1300, 1000, 1465))
             im_desc.save(r'img/temp/desc.png')
             desc = pytesseract.image_to_string((im_desc)).replace('\n', '')
             response = "**%s**" % name
@@ -65,21 +65,26 @@ async def send_profile(message):
                 response += "\n%s" % desc
             await message.channel.send(response)
             insta_match = re.search(
-                "((Instagram|instagram|Insta|insta|IG|ig|@):\s?|@)(\S+)", desc)
+                "((Instagram|instagram|Insta|insta|IG|1G|ig|@):\s?|@)(\S+)", desc)
             if insta_match != None:
                 insta_url = "https://www.instagram.com/%s" % insta_match.group(
                     3)
-                r = requests.get(insta_url).text
-                followers = int(re.search(
-                    '"edge_followed_by":{"count":([0-9]+)}', r).group(1))
-                insta_response = "%s (%i Followers)" % (insta_url, followers)
-                if followers < 150:
-                    insta_response += "\n**Nicht für den Gebrauch im Garten geeignet!**"
-                elif followers > 500:
-                    insta_response += "\n:warning:**Vorsicht: Gartengerät höchster Qualität!**:warning:"
+                try:
+                    r = requests.get(insta_url).text
+                except:
+                    print("Instagram error")
                 else:
-                    insta_response += "\n**Auf dieses Gerät ist verlass**"
-            await message.channel.send(insta_response)
+                    followers = int(re.search(
+                        '"edge_followed_by":{"count":([0-9]+)}', r).group(1))
+                    insta_response = "%s (%i Followers)" % (
+                        insta_url, followers)
+                    if followers < 150:
+                        insta_response += "\n**Nicht für den Gebrauch im Garten geeignet!**"
+                    elif followers > 500:
+                        insta_response += "\n:warning:**Vorsicht: Gartengerät höchster Qualität!**:warning:"
+                    else:
+                        insta_response += "\n**Auf dieses Gerät ist verlass**"
+                    await message.channel.send(insta_response)
         await message.channel.send(file=discord.File(r'img/temp/cropped%d.png' % im_count))
         im_count += 1
         if pix[1020, 202] == (255, 255, 255, 255) or pix[65, 202] != (255, 255, 255, 255):
